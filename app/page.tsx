@@ -1,10 +1,14 @@
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import Hero from '@/components/home/Hero';
+import LoadingContainer from '@/components/global/LoadingContainer';
+import { Suspense } from 'react';
 const HomePage = async () => {
   return (
     <>
       <Hero />
-      <FeaturedProducts />
+      <Suspense fallback={<LoadingContainer />}>
+        <FeaturedProducts />
+      </Suspense>
     </>
   );
 };
