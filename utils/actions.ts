@@ -35,3 +35,12 @@ export const fetchSingleProduct = async (productId: string) => {
   }
   return product;
 };
+
+export const createProductAction = async (
+  prevState: any,
+  formData: FormData
+): Promise<{ message: string }> => {
+  console.log(prevState);
+  console.log(formData);
+  return { message: 'product created' };
+};
