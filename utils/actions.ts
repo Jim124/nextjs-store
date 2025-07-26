@@ -2,9 +2,11 @@
 import db from '@/utils/db';
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
-import { productSchema, validateWithZodType } from './schemas';
+import { productSchema, validateWithZodType, imageSchema } from './schemas';
+import { uploadFileToFireBase } from './helper/uploadImagToFirebase';
+import { revalidatePath } from 'next/cache';
 
-const renderError = (error: unknown): { message: string } => {
+export const renderError = (error: unknown): { message: string } => {
   return {
     message: error instanceof Error ? error.message : 'An error occurred',
   };
@@ -60,16 +62,25 @@ export const createProductAction = async (
 
   try {
     const rawData = Object.fromEntries(formData);
+    const file = formData.get('image') as File;
     const validatedFields = validateWithZodType(productSchema, rawData);
+    const validatedFile = validateWithZodType(imageSchema, { image: file });
+    console.log(validatedFile);
+    const fullPath = (await uploadFileToFireBase(
+      validatedFile.image
+    )) as string;
     await db.product.create({
       data: {
         ...validatedFields,
-        image: '/images/hero1.jpg',
+        image: fullPath,
         clerkId: user.id,
       },
     });
-    return { message: 'product created' };
+    revalidatePath('/products');
+    revalidatePath('/');
+    // return { message: 'product created' };
   } catch (error) {
     return renderError(error);
   }
+  redirect('/products');
 };
