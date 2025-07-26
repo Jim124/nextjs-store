@@ -85,7 +85,28 @@ export const updateProductImageAction = async (
   prevState: any,
   formData: FormData
 ) => {
-  console.log(prevState);
-  console.log(formData);
-  return { message: 'Product Image updated successfully' };
+  await getAuthUser();
+  try {
+    const image = formData.get('image') as File;
+    const productId = formData.get('id') as string;
+    const oldImageUrl = formData.get('url') as string;
+
+    const validatedFile = validateWithZodType(imageSchema, { image });
+    const fullPath = (await uploadFileToFireBase(
+      validatedFile.image
+    )) as string;
+    await deleteFileFromFireBase(oldImageUrl);
+    await db.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        image: fullPath,
+      },
+    });
+    revalidatePath(`/admin/products/${productId}/edit`);
+    return { message: 'Product Image updated successfully' };
+  } catch (error) {
+    return renderError(error);
+  }
 };
