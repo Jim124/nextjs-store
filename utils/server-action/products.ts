@@ -2,7 +2,10 @@
 import db from '@/utils/db';
 import { redirect } from 'next/navigation';
 import { productSchema, validateWithZodType, imageSchema } from '../schemas';
-import { uploadFileToFireBase } from '../helper/uploadImagToFirebase';
+import {
+  deleteFileFromFireBase,
+  uploadFileToFireBase,
+} from '../helper/uploadImagToFirebase';
 import { revalidatePath } from 'next/cache';
 import { getAuthUser, getAdminUser } from '../helper/clerkAuth';
 import { renderError } from '../helper/commonError';
@@ -42,12 +45,12 @@ export const deleteProductAction = async (prevState: { productId: string }) => {
   await getAdminUser();
 
   try {
-    await db.product.delete({
+    const product = await db.product.delete({
       where: {
         id: productId,
       },
     });
-
+    await deleteFileFromFireBase(product.image);
     revalidatePath('/admin/products');
     return { message: 'product removed' };
   } catch (error) {
