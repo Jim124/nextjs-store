@@ -57,3 +57,20 @@ export const deleteProductAction = async (prevState: { productId: string }) => {
     return renderError(error);
   }
 };
+
+export const updateProductAction = async (
+  prevState: any,
+  formData: FormData
+) => {
+  console.log(prevState);
+  console.log(formData);
+  return { message: 'Product updated successfully' };
+};
+export const updateProductImageAction = async (
+  prevState: any,
+  formData: FormData
+) => {
+  console.log(prevState);
+  console.log(formData);
+  return { message: 'Product Image updated successfully' };
+};

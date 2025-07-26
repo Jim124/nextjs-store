@@ -47,3 +47,14 @@ export const fetchAdminProducts = async () => {
   });
   return products;
 };
+
+export const fetchAdminProductDetails = async (productId: string) => {
+  await getAdminUser();
+  const product = await db.product.findUnique({
+    where: {
+      id: productId,
+    },
+  });
+  if (!product) redirect('/admin/products');
+  return product;
+};
