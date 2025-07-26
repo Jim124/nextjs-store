@@ -2,11 +2,12 @@ import { faker } from '@faker-js/faker';
 import FormInput from '@/components/form/FormInput';
 import { SubmitButton } from '@/components/form/Buttons';
 import FormContainer from '@/components/form/FormContainer';
-import { createProductAction } from '@/utils/actions';
+import { createProductAction } from '@/utils/server-action/products';
 import ImageInput from '@/components/form/ImageInput';
 import PriceInput from '@/components/form/PriceInput';
 import TextAreaInput from '@/components/form/TextAreaInput';
 import CheckBoxInput from '@/components/form/CheckBoxInput';
+
 const CreateProductPage = () => {
   const name = faker.commerce.productName();
   const company = faker.company.name();

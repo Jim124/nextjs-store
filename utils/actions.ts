@@ -1,24 +1,8 @@
 'use server';
 import db from '@/utils/db';
 import { redirect } from 'next/navigation';
-import { currentUser } from '@clerk/nextjs/server';
-import { productSchema, validateWithZodType, imageSchema } from './schemas';
-import { uploadFileToFireBase } from './helper/uploadImagToFirebase';
-import { revalidatePath } from 'next/cache';
+import { getAdminUser } from './helper/clerkAuth';
 
-export const renderError = (error: unknown): { message: string } => {
-  return {
-    message: error instanceof Error ? error.message : 'An error occurred',
-  };
-};
-
-const getAuthUser = async () => {
-  const user = await currentUser();
-  if (!user) {
-    throw new Error('You must be logged in to access this route');
-  }
-  return user;
-};
 export const fetchFeaturedProducts = async () => {
   const products = await db.product.findMany({
     where: {
@@ -54,34 +38,12 @@ export const fetchSingleProduct = async (productId: string) => {
   return product;
 };
 
-export const createProductAction = async (
-  prevState: any,
-  formData: FormData
-): Promise<{ message: string }> => {
-  const user = await getAuthUser();
-
-  try {
-    const rawData = Object.fromEntries(formData);
-    const file = formData.get('image') as File;
-    const validatedFields = validateWithZodType(productSchema, rawData);
-    const validatedFile = validateWithZodType(imageSchema, { image: file });
-    console.log(validatedFile);
-    const fullPath = (await uploadFileToFireBase(
-      validatedFile.image
-    )) as string;
-    await db.product.create({
-      data: {
-        ...validatedFields,
-        image: fullPath,
-        clerkId: user.id,
-      },
-    });
-    revalidatePath('/products');
-    revalidatePath('/');
-    revalidatePath('/admin/products');
-    // return { message: 'product created' };
-  } catch (error) {
-    return renderError(error);
-  }
-  redirect('/admin/products');
+export const fetchAdminProducts = async () => {
+  await getAdminUser();
+  const products = await db.product.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+  return products;
 };

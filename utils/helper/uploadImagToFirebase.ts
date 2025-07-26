@@ -1,6 +1,6 @@
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import app from '../firebase';
-import { renderError } from '../actions';
+import { renderError } from './commonError';
 
 export const uploadFileToFireBase = async (file: any) => {
   try {
