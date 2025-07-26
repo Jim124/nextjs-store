@@ -78,9 +78,10 @@ export const createProductAction = async (
     });
     revalidatePath('/products');
     revalidatePath('/');
+    revalidatePath('/admin/products');
     // return { message: 'product created' };
   } catch (error) {
     return renderError(error);
   }
-  redirect('/products');
+  redirect('/admin/products');
 };
