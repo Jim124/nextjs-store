@@ -1,6 +1,22 @@
 'use server';
 import db from '@/utils/db';
 import { redirect } from 'next/navigation';
+import { currentUser } from '@clerk/nextjs/server';
+import { productSchema, validateWithZodType } from './schemas';
+
+const renderError = (error: unknown): { message: string } => {
+  return {
+    message: error instanceof Error ? error.message : 'An error occurred',
+  };
+};
+
+const getAuthUser = async () => {
+  const user = await currentUser();
+  if (!user) {
+    throw new Error('You must be logged in to access this route');
+  }
+  return user;
+};
 export const fetchFeaturedProducts = async () => {
   const products = await db.product.findMany({
     where: {
@@ -40,7 +56,20 @@ export const createProductAction = async (
   prevState: any,
   formData: FormData
 ): Promise<{ message: string }> => {
-  console.log(prevState);
-  console.log(formData);
-  return { message: 'product created' };
+  const user = await getAuthUser();
+
+  try {
+    const rawData = Object.fromEntries(formData);
+    const validatedFields = validateWithZodType(productSchema, rawData);
+    await db.product.create({
+      data: {
+        ...validatedFields,
+        image: '/images/hero1.jpg',
+        clerkId: user.id,
+      },
+    });
+    return { message: 'product created' };
+  } catch (error) {
+    return renderError(error);
+  }
 };
