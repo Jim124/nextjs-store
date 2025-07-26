@@ -1,6 +1,8 @@
 'use server';
+import { revalidatePath } from 'next/cache';
 import { getAuthUser } from '../helper/clerkAuth';
 import db from '@/utils/db';
+import { renderError } from '../helper/commonError';
 export const fetchFavoriteId = async ({ productId }: { productId: string }) => {
   const user = await getAuthUser();
   const favorite = await db.favorite.findFirst({
@@ -14,6 +16,31 @@ export const fetchFavoriteId = async ({ productId }: { productId: string }) => {
   });
   return favorite?.id || null;
 };
-export const toggleFavoriteAction = async () => {
-  return { message: 'toggle favorite action' };
+export const toggleFavoriteAction = async (prevState: {
+  productId: string;
+  favoriteId: string | null;
+  pathname: string;
+}) => {
+  const user = await getAuthUser();
+  const { productId, favoriteId, pathname } = prevState;
+  try {
+    if (favoriteId) {
+      await db.favorite.delete({
+        where: {
+          id: favoriteId,
+        },
+      });
+    } else {
+      await db.favorite.create({
+        data: {
+          productId,
+          clerkId: user.id,
+        },
+      });
+    }
+    revalidatePath(pathname);
+    return { message: favoriteId ? 'Removed from Faves' : 'Added to Faves' };
+  } catch (error) {
+    return renderError(error);
+  }
 };
