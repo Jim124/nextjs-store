@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { productSchema, validateWithZodType, imageSchema } from '../schemas';
 import { uploadFileToFireBase } from '../helper/uploadImagToFirebase';
 import { revalidatePath } from 'next/cache';
-import { getAuthUser } from '../helper/clerkAuth';
+import { getAuthUser, getAdminUser } from '../helper/clerkAuth';
 import { renderError } from '../helper/commonError';
 export const createProductAction = async (
   prevState: any,
@@ -35,4 +35,22 @@ export const createProductAction = async (
     return renderError(error);
   }
   redirect('/admin/products');
+};
+
+export const deleteProductAction = async (prevState: { productId: string }) => {
+  const { productId } = prevState;
+  await getAdminUser();
+
+  try {
+    await db.product.delete({
+      where: {
+        id: productId,
+      },
+    });
+
+    revalidatePath('/admin/products');
+    return { message: 'product removed' };
+  } catch (error) {
+    return renderError(error);
+  }
 };
