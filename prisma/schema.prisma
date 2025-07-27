@@ -25,6 +25,8 @@ model Product {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   favorites Favorite[]
+  reviews Review []
+  cartItems CartItem[]
   clerkId  String
 }
 
@@ -33,6 +35,43 @@ model Favorite {
   clerkId      String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Review {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId  String
+  rating Int
+  comment String
+  authorName String
+  authorImageUrl String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String @db.ObjectId
+}
+
+model Cart {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId  String
+  cartItems CartItem[]
+  numItemsInCart Int @default(0)
+  cartTotal Int @default(0)
+  shipping Int @default(5)
+  tax Int @default(0)
+  taxRate Float @default(0.1)
+  orderTotal Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+model CartItem {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String @db.ObjectId
+  cart     Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cartId   String @db.ObjectId
+  amount  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -7,6 +7,10 @@ const nextConfig = {
         hostname: 'images.pexels.com',
       },
       { protocol: 'https', hostname: 'firebasestorage.googleapis.com' },
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+      },
     ],
   },
 };
