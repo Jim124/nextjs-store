@@ -6,6 +6,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { getAuthUser } from '../helper/clerkAuth';
 import { renderError } from '../helper/commonError';
+
 export const fetchCartItems = async () => {
   const { userId } = await auth();
 
@@ -111,6 +112,9 @@ export const updateCart = async (cart: Cart) => {
     include: {
       product: true, // Include the related product
     },
+    orderBy: {
+      createdAt: 'asc',
+    },
   });
 
   let numItemsInCart = 0;
@@ -124,7 +128,7 @@ export const updateCart = async (cart: Cart) => {
   const shipping = cartTotal ? cart.shipping : 0;
   const orderTotal = cartTotal + tax + shipping;
 
-  await db.cart.update({
+  const currentCart = await db.cart.update({
     where: {
       id: cart.id,
     },
@@ -135,6 +139,7 @@ export const updateCart = async (cart: Cart) => {
       orderTotal,
     },
   });
+  return { currentCart, cartItems };
 };
 export const addToCartAction = async (prevState: any, formData: FormData) => {
   const user = await getAuthUser();
