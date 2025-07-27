@@ -14,6 +14,7 @@ type SubmitButtonProps = {
   text?: string;
   size?: btnSize;
 };
+
 export const SubmitButton = ({
   className = '',
   text = 'submit',
@@ -100,5 +101,14 @@ export const CardSubmitButton = ({ isFavorite }: { isFavorite: boolean }) => {
         <FaRegHeart />
       )}
     </Button>
+  );
+};
+export const ProductSignInButton = () => {
+  return (
+    <SignInButton mode='modal'>
+      <Button type='button' size='default' className='mt-8'>
+        Please Sign In
+      </Button>
+    </SignInButton>
   );
 };
